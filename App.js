@@ -1,20 +1,140 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import { ActivityIndicator, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import {Picker} from '@react-native-picker/picker';
+import PickerItem from './src/Picker';
+import { api } from './src/service/api';
 
 export default function App() {
+  const [loading, setLoading] = useState(true);
+  const [ moedas, setMoedas] = useState([]);
+  const [moedaSelecionada, setMoedaSelecionada] = useState(null);
+  const [moedaBValor, setMoedaBValor] = useState('')
+  const [valorMoeda, setValorMoeda] = useState(null);
+  const [valorConvertido, setValorConvertido] = useState(0)
+
+useEffect( () =>{
+  async function loadMoedas() {
+    const response = await api.get('all')
+    let arrayMoedas = [];
+    Object.keys(response.data).map( (key) =>{
+      arrayMoedas.push({
+        key: key , 
+        label: key , 
+        value: key,
+      })
+    })
+    setMoedas(arrayMoedas);
+    setMoedaSelecionada(arrayMoedas[0].key)
+    setLoading(false);
+  }
+  loadMoedas();
+}, [])
+
+if(loading) {
+  return (
+    <View style={{justifyContent: 'center', flex: 1, alignItems: 'center', backgroundColor: '#121210'}}>
+      <ActivityIndicator color={'#fff'}  size={'large'}/>
+    </View>
+  )
+} else{
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+        <View style={styles.areaMoeda}>
+          <Text style={styles.titulo}>Selecione a Moeada</Text>
+          <PickerItem
+            moedas={moedas}
+            moedaSelecionada={moedaSelecionada}
+            onChange={ (moeda) => {
+              setMoedaSelecionada(moeda);
+            }}
+          />
+        </View>
+
+        <View style={styles.areaValor}>
+          <Text style={styles.titulo}>Digite um valor para converter em (R$)</Text>
+          <TextInput
+            placeholder='EX: 1.50'
+            style={styles.input}
+            keyboardType= 'numeric'
+            value={moedaBValor}
+            onChangeText={ (valor) => setMoedaBValor(valor) }
+          />
+        </View>
+
+        <TouchableOpacity style={styles.areaBotao}>
+          <Text style={styles.botaoText}>Converter</Text>
+        </TouchableOpacity>
+
+        <View style={styles.areaResultado}>
+            <Text style={styles.valorConvertido}>3USD</Text>
+            <Text style={{fontSize: 18, margin: 8, fontWeight: '500'}}>corresponde a: </Text>
+            <Text style={styles.valorConvertido}>R$ 100,00</Text>
+        </View>
     </View>
   );
+}
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#101215',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 40
   },
+  areaMoeda: {
+    backgroundColor: '#fff',
+    width: '90%',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    padding: 8,
+    marginBottom: 1
+  },
+  titulo: {
+    fontSize: 16,
+    color: '#000',
+    fontWeight: 'bold',
+    paddingLeft: 5,
+    paddingTop: 5
+  },
+  areaValor: {
+    width: '90%',
+    backgroundColor: '#fff',
+    paddingTop: 8,
+    paddingBottom: 8
+  },
+  input: {
+    fontSize: 18,
+    color: '#000',
+    width: '100%',
+    padding: 8
+  },
+  areaBotao: {
+    width: '90%',
+    backgroundColor: '#05c46b',
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  botaoText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  areaResultado: {
+    width: '90%',
+    backgroundColor: '#fff',
+    marginTop: 35,
+    borderRadius: 8,
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  valorConvertido: {
+    fontSize: 28,
+    color: '#000',
+    fontWeight: 'bold',
+  }
 });
