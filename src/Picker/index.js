@@ -8,7 +8,7 @@ export default function PickerItem (props) {
   })
   return (
     <Picker
-    //selectedValue={props.moedaSelecionada}
+    selectedValue={props.moedaSelecionada}
     onValueChange={ (valor) => props.onChange(valor) }
     >
       {moedasItem}

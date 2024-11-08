@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { ActivityIndicator, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, TextInput, TouchableOpacity, Keyboard } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import PickerItem from './src/Picker';
 import { api } from './src/service/api';
@@ -29,6 +29,19 @@ useEffect( () =>{
   }
   loadMoedas();
 }, [])
+
+async function converter () {
+  if(moedaBValor === 0 || moedaBValor ==='' || moedaBValor === null) {
+    return;
+  }
+
+  const response = await api.get(`/all/${moedaSelecionada}-BRL `)
+
+  let resultado = (response.data[moedaSelecionada].ask * parseFloat(moedaBValor))
+  setValorConvertido(`${resultado.toLocaleString("pt-BR",{style: "currency", currency: 'BRL'})}`)
+  setValorMoeda(moedaBValor)
+  Keyboard.dismiss
+}
 
 if(loading) {
   return (
@@ -61,15 +74,21 @@ if(loading) {
           />
         </View>
 
-        <TouchableOpacity style={styles.areaBotao}>
+        <TouchableOpacity style={styles.areaBotao} onPress={converter}>
           <Text style={styles.botaoText}>Converter</Text>
         </TouchableOpacity>
-
+            {valorConvertido !== 0 && (
+              
         <View style={styles.areaResultado}>
-            <Text style={styles.valorConvertido}>3USD</Text>
-            <Text style={{fontSize: 18, margin: 8, fontWeight: '500'}}>corresponde a: </Text>
-            <Text style={styles.valorConvertido}>R$ 100,00</Text>
-        </View>
+        <Text style={styles.valorConvertido}>
+          {valorMoeda} {moedaSelecionada}
+          </Text>
+        <Text style={{fontSize: 18, margin: 8, fontWeight: '500'}}>corresponde a: </Text>
+        <Text style={styles.valorConvertido}>
+          {valorConvertido}
+          </Text>
+    </View>
+            )}
     </View>
   );
 }
